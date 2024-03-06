@@ -18,11 +18,12 @@ jobs:
           pip install -r requirements.txt  # Adjust requirements file name as needed
 
       - name: Deploy to Windows EC2
-        run: scp -o StrictHostKeyChecking=no -r . ${{ secrets.WINDOWS_USERNAME }}@${{ secrets.WINDOWS_HOST }}:"C:\\User\\Administrator\\Desktop\\Model"
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          sudo apt-get install -y sshpass
+          sshpass -p "${{ secrets.WINDOWS_PASSWORD }}" scp -o StrictHostKeyChecking=no -r . ${{ secrets.WINDOWS_USERNAME }}@${{ secrets.WINDOWS_HOST }}:"C:\\User\\Administrator\\Desktop\\Model"
+     
 
       - name: Run app.py
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.WINDOWS_USERNAME }}@${{ secrets.WINDOWS_HOST }} "python C:\\User\\Administrator\\Desktop\\Model\\app.py"
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          sudo apt-get install -y sshpass
+          sshpass -p "${{ secrets.WINDOWS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.WINDOWS_USERNAME }}@${{ secrets.WINDOWS_HOST }} "python C:\\User\\Administrator\\Desktop\\Model\\app.py"
