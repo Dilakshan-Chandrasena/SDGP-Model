@@ -1,48 +1,32 @@
-name: Deploy Breed Pred Model
+name: Deploy Application
 
 on:
   push:
     branches:
-      - main
+      - main  # Adjust branch name as needed
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest  # GitHub Actions runners support SCP, even for Windows deployments
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10'
-          
-      - name: Create virtual environment
-        run: python -m venv venv
-
-      - name: Activate virtual environment
-        run: source venv/bin/activate
-
+      
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip==21.2.3
-          pip install -r requirements.txt
+          pip install -r requirements.txt  # Adjust requirements file name as needed
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Deploy EC2
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
-        ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.SSH_USER }}@${{ secrets.PUBLIC_IP }} "
-        cd SDGP-Model/ && 
-        ls &&
-        git pull &&
-        /usr/bin/python3 -m pip install --upgrade pip==21.2.3 && 
-        /usr/bin/python3 -m pip install -r requirements.txt && 
-        gunicorn -w 4 -b 0.0.0.0:8000 app:app"
+      - name: Deploy to Windows EC2
+        uses: appleboy/win-scp-action@v1
+        with:
+          host: ${{ secrets.WINDOWS_HOST }}
+          username: ${{ secrets.WINDOWS_USERNAME }}
+          password: ${{ secrets.WINDOWS_PASSWORD }}  # Alternatively, use private key for authentication
+          source: .  # Assuming your files are in the root directory of the repository
+          target: "C:\\Users\\Administrator\\Desktop\\Model"  # Adjust target directory on the Windows EC2 instance
+          args: -r  # Recursively copy all files and directories
 
-
+      - name: Run app.py
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.WINDOWS_USERNAME }}@${{ secrets.WINDOWS_HOST }} "python C:\\Users\\Administrator\\Desktop\\Model\\app.py"
