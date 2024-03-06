@@ -33,20 +33,16 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     
-    steps:    
-    - name: Deploy to EC2
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.PUBLIC_IP }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: "."
-        target: "/home/ubuntu/Model"
-        args: -r  # Recursively copy all files and directories
-
-    # - name: Run Gunicorn
-    #   run: |
-    #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
-    #     ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.SSH_USER }}@${{ secrets.PUBLIC_IP }} "cd /home/ubuntu/Model && /usr/bin/python3 -m pip install --upgrade pip==21.2.3 && /usr/bin/python3 -m pip install -r requirements.txt && gunicorn -w 4 -b 0.0.0.0:8000 app:app"
+    steps:
+    - name: Deploy EC2
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
+        ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.SSH_USER }}@${{ secrets.PUBLIC_IP }} "
+        cd /Model && 
+        ls &&
+        git pull &&
+        /usr/bin/python3 -m pip install --upgrade pip==21.2.3 && 
+        /usr/bin/python3 -m pip install -r requirements.txt && 
+        gunicorn -w 4 -b 0.0.0.0:8000 app:app"
 
 
