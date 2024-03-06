@@ -18,15 +18,11 @@ jobs:
           pip install -r requirements.txt  # Adjust requirements file name as needed
 
       - name: Deploy to Windows EC2
-        uses: appleboy/win-scp-action@v1
-        with:
-          host: ${{ secrets.WINDOWS_HOST }}
-          username: ${{ secrets.WINDOWS_USERNAME }}
-          password: ${{ secrets.WINDOWS_PASSWORD }}  # Alternatively, use private key for authentication
-          source: .  # Assuming your files are in the root directory of the repository
-          target: "C:\\Users\\Administrator\\Desktop\\Model"  # Adjust target directory on the Windows EC2 instance
-          args: -r  # Recursively copy all files and directories
+        run: scp -o StrictHostKeyChecking=no -r . ${{ secrets.WINDOWS_USERNAME }}@${{ secrets.WINDOWS_HOST }}:"C:\\User\\Administrator\\Desktop\\Model"
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Run app.py
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.WINDOWS_USERNAME }}@${{ secrets.WINDOWS_HOST }} "python C:\\Users\\Administrator\\Desktop\\Model\\app.py"
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.WINDOWS_USERNAME }}@${{ secrets.WINDOWS_HOST }} "python C:\\User\\Administrator\\Desktop\\Model\\app.py"
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
