@@ -1,4 +1,4 @@
-name: Deploy Pred Model
+name: Deploy Breed Pred Model
 
 on:
   push:
