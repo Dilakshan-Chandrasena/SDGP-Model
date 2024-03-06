@@ -1,4 +1,4 @@
-name: Deploy Model
+name: Deploy Pred Model
 
 on:
   push:
