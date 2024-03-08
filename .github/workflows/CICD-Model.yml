@@ -1,29 +1,22 @@
-name: Deploy Application
+name: Deploy to Windows EC2
 
 on:
   push:
     branches:
-      - main  # Adjust branch name as needed
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # GitHub Actions runners support SCP, even for Windows deployments
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt  # Adjust requirements file name as needed
 
-      - name: Deploy to Windows EC2
-        run: |
-          sudo apt-get install -y sshpass
-          sshpass -p "${{ secrets.WINDOWS_PASSWORD }}" scp -o StrictHostKeyChecking=no -r . ${{ secrets.WINDOWS_USERNAME }}@${{ secrets.WINDOWS_HOST }}:"C:\\User\\Administrator\\Desktop\\Model"
-     
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Run app.py
+      - name: Deploy to EC2
         run: |
-          sudo apt-get install -y sshpass
-          sshpass -p "${{ secrets.WINDOWS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.WINDOWS_USERNAME }}@${{ secrets.WINDOWS_HOST }} "python C:\\User\\Administrator\\Desktop\\Model\\app.py"
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} Administrator@13.53.41.52 "cd C:\Users\Administrator\Desktop\Model && git pull origin main && pip install -r requirements.txt && python app.py"
