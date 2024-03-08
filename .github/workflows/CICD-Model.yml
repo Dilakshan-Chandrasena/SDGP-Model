@@ -25,6 +25,6 @@ jobs:
 
       - name: Deploy Flask app
         run: |
-          scp -i C:\Users\dilak\OneDrive\Desktop\AWS\key.pem -r C:\Users\Administrator\Desktop\Model\SDGP-Model Administrator@13.53.41.52:C:\Users\Administrator\Desktop\Model\SDGP-Model
-          ssh -i C:\Users\dilak\OneDrive\Desktop\AWS\key.pem Administrator@13.53.41.52 "cd C:\Users\Administrator\Desktop\Model\SDGP-Model && python app.py"
+          scp -i C:\Users\dilak\OneDrive\Desktop\AWS\PetBay-Win.pem -r C:\Users\Administrator\Desktop\Model\SDGP-Model Administrator@13.53.41.52:C:\Users\Administrator\Desktop\Model\SDGP-Model
+          ssh -i C:\Users\dilak\OneDrive\Desktop\AWS\PetBay-Win.pem Administrator@13.53.41.52 "cd C:\Users\Administrator\Desktop\Model\SDGP-Model && python app.py"
 
