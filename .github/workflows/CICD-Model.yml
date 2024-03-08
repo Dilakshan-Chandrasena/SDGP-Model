@@ -1,22 +1,30 @@
-name: Deploy to Windows EC2
+name: Deploy Flask App
 
 on:
   push:
     branches:
-      - main
+      - main  # Adjust this to match your main branch name
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # Use a Windows runner for this workflow
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2  # This step checks out your repository's code
 
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: Install Python and dependencies
+        uses: actions/setup-python@v2
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          python-version: 3.10.0  # Choose the Python version you need
+      # Install any additional dependencies your app requires
 
-      - name: Deploy to EC2
+      - name: Install pip dependencies
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} Administrator@13.53.41.52 "cd C:\Users\Administrator\Desktop\Model\SDGP-Model && git pull origin main && pip install -r requirements.txt && python app.py"
+          pip install -r requirements.txt 
+
+      - name: Deploy Flask app
+        run: |
+          scp -i C:\Users\dilak\OneDrive\Desktop\AWS\key.pem -r C:\Users\Administrator\Desktop\Model\SDGP-Model Administrator@13.53.41.52:C:\Users\Administrator\Desktop\Model\SDGP-Model
+          ssh -i C:\Users\dilak\OneDrive\Desktop\AWS\key.pem Administrator@13.53.41.52 "cd C:\Users\Administrator\Desktop\Model\SDGP-Model && python app.py"
+
