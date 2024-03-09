@@ -1,30 +1,31 @@
-name: Deploy Flask App
+name: Deploy Web Application
 
 on:
   push:
     branches:
-      - main  # Adjust this to match your main branch name
+      - main
 
 jobs:
-  deploy:
-    runs-on: windows-latest  # Use a Windows runner for this workflow
-
+  build:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2  # This step checks out your repository's code
+      - name: Checkout Source
+        uses: actions/checkout@v4
+      - name: Login to docker hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Create docker image for the model
+        run: docker build -t dilakshanchandrasena/petbay-model .
+      - name: Push Model docker image to dockerhub
+        run: docker push dilakshanchandrasena/petbay-model:latest
 
-      - name: Install Python and dependencies
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.10.0  # Choose the Python version you need
-      # Install any additional dependencies your app requires
 
-      - name: Install pip dependencies
-        run: |
-          pip install -r requirements.txt 
-
-      - name: Deploy Flask app
-        run: |
-          scp -i C:\Users\dilak\OneDrive\Desktop\AWS\PetBay-Win.pem -r C:\Users\Administrator\Desktop\Model\SDGP-Model Administrator@13.53.41.52:C:\Users\Administrator\Desktop\Model\SDGP-Model
-          ssh -i C:\Users\dilak\OneDrive\Desktop\AWS\PetBay-Win.pem Administrator@13.53.41.52 "cd C:\Users\Administrator\Desktop\Model\SDGP-Model && python app.py"
-
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Pull Model image from docker hub
+        run: docker pull dilakshanchandrasena/petbay-model:latest
+      - name: Delete old container
+        run: docker rm -f petbay-model-container
+      - name: Run Docker Container
+        run: docker run -d -p 80:80 --name petbay-client-container dilakshanchandrasena/petbay-model
