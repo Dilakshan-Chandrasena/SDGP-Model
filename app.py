@@ -136,6 +136,7 @@ classes =['affenpinscher',
  'wire-haired_fox_terrier',
  'yorkshire_terrier']
 
+
 def preprocess_image(img):
     input_shape = (331, 331, 3)
     img = Image.open(io.BytesIO(img.read()))
@@ -153,14 +154,20 @@ def hello_world():  # put application's code here
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if request.method == 'POST':
-        img = preprocess_image(request.files['image'])
-        prediction = model.predict(img)
-        print(f"Predicted label: {classes[np.argmax(prediction[0])]}")
-        print(f"Probability of prediction): {round(np.max(prediction[0])) * 100} %")
+    try:
+        if request.method == 'POST':
+            img = preprocess_image(request.files['image'])
+            prediction = model.predict(img)
+            print(f"Predicted label: {classes[np.argmax(prediction[0])]}")
+            print(f"Probability of prediction): {round(np.max(prediction[0])) * 100} %")
 
-        label = classes[np.argmax(prediction[0])]
-        return jsonify({'pred': label})
+            label = classes[np.argmax(prediction[0])]
+            return jsonify({'pred': label})
+    except IndexError as e:
+        print("Invalid Image- Returning BAD REQUEST to client")
+        return "Invalid Image", 400
+    except Exception as e:
+        return "Invalid Image", 400
 
 if __name__ == '__main__':
     app.run()
