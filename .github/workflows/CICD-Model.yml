@@ -1,4 +1,4 @@
-name: Deploy Breed Prediction Model
+name: Deploy Breed Prediction Model 
 
 on:
   push:
